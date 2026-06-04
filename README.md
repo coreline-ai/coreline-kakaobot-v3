@@ -1,6 +1,10 @@
 <div align="center">
 
-<img width="2752" height="1536" alt="unnamed" src="https://github.com/user-attachments/assets/91806f11-5442-49bd-90b2-a6bde7b3416d" />
+<img width="2752" height="1536" alt="unnamed" src="https://github.com/user-attachments/assets/8e3c2520-5940-4939-9c3c-2bb7dc8098ef" />
+
+<img width="0" height="0" alt="내 손안의 똑똑한 인공지능 비서" src="https://github.com/user-attachments/assets/ed44a691-82f8-4bc7-8be4-af2e4b16f62b" />
+
+<img width="0" height="0" alt="kakao_archive_rag_architecture_infographic" src="https://github.com/user-attachments/assets/ae612b10-2c5d-45ef-96e1-ca352e88fced" />
 
 <h1 id="top">🤖 코비서 · Coreline Kakao Chatbot V3</h1>
 
@@ -120,12 +124,11 @@
 - `conversation_proxy`
   - 특정 카카오 방 대화를 7일간 저장하고 의미 기반 검색/요약/통계를 수행하는 대화 아카이브 프록시
 - `image_proxy`
-  - `local-gen-image-OC`를 래핑해 이미지 생성, QC, OG 페이지 링크 생성, quick tunnel 공개를 담당하는 이미지 프록시
+  - Codex CLI imagegen으로 이미지/인포그래픽을 생성하고, 문서 HTML은 `image_proxy/public/docs`로 publish하는 미디어 프록시
 - `summary_proxy`
   - YouTube / GitHub / Web 링크를 받아 구조화 요약을 반환하는 프록시
 - `notebooklm_proxy`
-  - legacy/optional 인포그래픽 프록시
-  - `코비서 인포 <URL>`의 구형 경로를 보존하지만 기본 라우팅에서는 사용하지 않음
+  - 현재 운영 경로에서 사용하지 않는 보관/참조용 인포그래픽 프록시
 - `fortune_proxy`
   - `코비서 운세`, `코비서 오늘 운세`, `코비서 쥐띠 운세`, `코비서 물병자리 운세`, `코비서 A형 운세` 같은 요청을 받아 띠별/별자리/혈액형 운세 응답을 생성하는 운세 프록시
 - `weather_proxy`
@@ -145,7 +148,7 @@
 - `archive_rag_data`
   - 정규화된 대화(canonical), SQLite 카탈로그(catalog), 인덱스 export 저장소
 - `pipeline-notebooklm`
-  - `notebooklm_proxy`가 내부에서 사용하는 vendored NotebookLM client / pipeline 소스
+  - 현재 운영 경로에서 사용하지 않는 vendored NotebookLM client / pipeline 소스
 
 이 프로젝트는 단순한 “LLM 답장기”가 아니라, 아래 2가지를 동시에 목표로 둡니다.
 
@@ -163,9 +166,9 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 자동응답 | 날씨 | 뉴스 | 토픽 | 리서치 | 문맥 메모리 | 대화 아카이브 | 바이브인포 |
 
-| 🖼️ | 🔗 | 📊 | 🔮 | 🔀 | 📈 | 🛡️ | ⚙️ |
+| 🖼️ | 🔗 | 📊 | 📄 | 🔮 | 📈 | 🛡️ | ⚙️ |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| 이미지 | 링크 요약 | 인포그래픽 | 운세 | LLM 라우팅 | 금융/주식 | 보안/복구 | 모드 전환 |
+| 이미지 | 링크 요약 | 인포그래픽 | 문서HTML | 운세 | 금융/주식 | 보안/복구 | 모드 전환 |
 
 </div>
 
@@ -175,6 +178,8 @@
 - 허용 사용자 필터를 CSV 입력 형식으로 관리할 수 있습니다.
 - 방 단위 중복 응답 방지와 burst throttling이 들어 있습니다.
 - 프록시 장애 시 현재 메시지 기준으로 `GLM` fallback이 동작합니다.
+- 다중 전송 검증용 테스트 명령 `코비서 연속테스트`는 실제 `RemoteInput`으로 1초 간격 3개 메시지를 순차 전송합니다.
+- 간격/개수 측정은 `코비서 연속테스트 5초 3개`처럼 요청하며, 안전을 위해 1~60초 / 1~10개 범위로 제한합니다.
 
 ### 🧪 앱 전면 도움말 예제 테스트
 - Android 메인 화면에서 `도움말 예제 테스트` 버튼으로 대표 기능 예제를 직접 실행할 수 있습니다.
@@ -237,7 +242,7 @@
 - 지정 방(`기본값: 바이브랩스`)의 모든 카카오 메시지를 호출어 없이 수집합니다.
 - Android는 로컬 outbox에 저장한 뒤 `conversation_proxy`로 비동기 전송합니다.
 - `conversation_proxy`는 SQLite에 최대 7일 보관하고 이후 자동 삭제합니다.
-- `코비서 바이스 오늘 대화 요약`, `1일치 대화내용 요약해줘`, `아무개 오늘 대화 요약해줘`, `API 관련해서 지난 3일 무슨 얘기 있었어` 같은 자연어 질의를 지원합니다.
+- `코비서 바이스 오늘 대화 요약`, `코비서 바이브 1시간 정리`, `코비서 바이브 24시간 요약`, `1일치 대화내용 요약해줘`, `최경환 오늘 대화 요약해줘`, `API 관련해서 지난 3일 무슨 얘기 있었어` 같은 자연어 질의를 지원합니다.
 - `코비서 바이스 대화 통계`, `코비서 바이스 7일 대화 통계`, `코비서 이 방 대화 통계` 같은 명시형 통계 질의도 지원합니다.
 - `바이브`, `바이스`, `바이브랩스`는 모두 같은 아카이브 방 별칭으로 처리합니다.
 - 요약은 `주요 논의`, `작업 / 할 일`, `결정사항`, `일정 / 약속`, `이슈 / 리스크`, `사람별 핵심 발언` 카테고리로 정리됩니다.
@@ -257,9 +262,9 @@
 
 ### 🖼️ 이미지 링크 응답
 - `코비서 이미지 ...`, `코비서 그림 ...`, `코비서 사진 ...`처럼 명시 키워드가 있는 요청만 이미지 생성 경로로 분기합니다.
-- Android는 `image_proxy`로 요청을 보내고, `image_proxy`는 `local-gen-image-OC`의 생성/QC/OG 파이프라인을 실행합니다.
-- `2026-04-22` 기준 `image_proxy`는 선택형 `codex_cli` backend도 지원하며, `codex exec --model gpt-5.4 --enable image_generation` + `imagegen`으로 생성한 PNG를 기존 `local-gen-image-OC/public/images` publish 경로에 태울 수 있습니다.
-- 코드 기본값은 기존 `local` backend 유지이며, 현재 운영 전환 시에는 `IMAGE_PROXY_GENERATOR_BACKEND=codex_cli`로 명시합니다.
+- Android는 `image_proxy`로 요청을 보내고, `image_proxy`는 Codex CLI imagegen 단일 backend로 PNG를 생성합니다.
+- 생성된 PNG/metadata는 `image_proxy/public/images`에 저장하고, `scripts/image_publish_server.mjs`가 OG 페이지를 제공합니다.
+- `local-gen-image-OC` local Stable Diffusion 생성/QC/OG 파이프라인은 현재 사용하지 않습니다.
 - `2026-04-22` 현재 점검 기준 운영 health는 `generatorBackend=codex_cli`, `codexCliModel=gpt-5.4`, `imageGenerationFeatureEnabled=true`입니다.
 - `2026-04-23` 기준 목표 PNG가 stable 생성되면 Codex CLI worker 종료를 끝까지 기다리지 않고 조기 성공 처리하도록 보강해 Android `IMAGE_PROXY_TIMEOUT_SECONDS=300` 재현 이슈를 줄였습니다.
 - 카카오 답변은 텍스트 링크만 전송합니다.
@@ -286,7 +291,7 @@
 - 최종 구조화 요약은 `summary_proxy`의 현재 backend(`codex|local`) 경로로 생성됩니다.
 - `2026-04-07` 기준 `summary_proxy` self-test(`youtube`, `github`, `web`, `all`) 검증 완료 상태입니다.
 
-### 📊 인포그래픽 링크 응답 (image_proxy / legacy NotebookLM)
+### 📊 인포그래픽 링크 응답 (image_proxy)
 - `코비서 인포 <URL 또는 주제>` 형식의 명령을 지원합니다.
 - Android는 기본 경로에서 `image_proxy`로 직접 요청을 보냅니다.
 - URL 입력은 필요 시 `summary_proxy /api/v1/source-pack`으로 정제 텍스트를 만든 뒤 `image_proxy` 인포그래픽 프롬프트로 넘깁니다.
@@ -294,10 +299,23 @@
 - 성공 시 카카오 답변은 텍스트 링크만 전송합니다.
 - 형식은 `페이지: https://.../post/{id}`만 노출합니다. 직접 `이미지:` URL은 노출하지 않습니다.
 - 인포그래픽 성공 기준은 **PNG 생성 + 공개 페이지 검증 완료**입니다.
-- NotebookLM은 legacy/optional 경로로만 보존하며, 기본 운영 경로에서는 사용하지 않습니다.
-- `2026-04-22` 기준 기본 운영 경로는 `Android -> image_proxy -> Codex imagegen -> postUrl`이며, NotebookLM은 구형 호환용으로만 남겨 둡니다.
+- NotebookLM / `notebooklm_proxy` legacy 경로는 현재 사용하지 않습니다.
+- `2026-06-01` 기준 기본 운영 경로는 `Android -> image_proxy -> Codex imagegen -> image_proxy publish server -> postUrl`입니다.
 - 현재 확인된 검증선은 `image_proxy /api/v1/infographic` topic smoke, GitHub URL source-pack smoke, Android 실기기 help-example입니다.
 - 실제 카카오방 수동 입력 E2E는 별도 최종 검증 항목으로 남겨 둡니다.
+
+### 📄 문서 HTML 링크 응답 (summary_proxy + image_proxy)
+- `코비서 문서입문 <URL>`, `코비서 문서전문 <URL>`, `코비서 문서체크 <URL>`처럼 URL을 목적형 HTML 문서로 변환합니다.
+- 주식/시장 질문은 URL 없이도 `코비서 문서주식 한국주식시장 장중 정리`처럼 요청할 수 있으며, Android가 먼저 `stock_proxy /api/v1/document/stock-brief` 구조 브리핑을 만든 뒤 `sourceData`로 `image_proxy /api/v1/document-html`에 전달합니다.
+- 바이브랩스 대화 요약은 URL 없이도 `코비서 문서바이브 1일 정리`처럼 요청할 수 있으며, Android가 먼저 `conversation_proxy` 아카이브 요약을 만든 뒤 `sourceKind=vibe_archive`, `summarySource=conversation_archive_summary` 문서로 발행합니다.
+- 전체 추천 명령은 `코비서 문서도움말`로 확인합니다.
+- Android는 `image_proxy /api/v1/document-html`로 요청을 보내고, URL 입력은 `summary_proxy /api/v1/source-pack`, 주식/시장 텍스트 입력은 `stock_proxy`, 바이브 대화 입력은 `conversation_proxy` 구조 원천으로 정제한 뒤 `image_proxy/public/docs/<id>/index.html`을 생성합니다.
+- 성공 기준은 **public HTML `postUrl` 생성 + 검증 완료**입니다.
+- `adaptive-html-final@4.5.0` vendored 자산 기반 렌더러를 사용하며, metadata-only/fallback-only source는 완성 문서로 발행하지 않고 사용자 안내 fallback을 반환합니다.
+- `문서주식`/`stock_market` 문서는 `expert_html` 계열 품질 기준을 적용해 `Executive Summary`, 주요 지수 스냅샷, 섹터·뉴스 테마, `Risk Matrix`, 장중 대응 로드맵, 검증 체크리스트, 최종 권고와 `wg-11`/`rm-grid`/`plan-grid` adaptive block을 포함합니다.
+- `문서바이브`/`vibe_archive` 문서는 주식 브리핑 틀이 아니라 바이브 대화 매거진 다이제스트로 렌더링하며, 오늘의 한줄, Top 5 Signals, 대화 온도판, Topic Constellation/화제 클러스터, Deep Dive, 툴·스킬 레이더, 작업·결정 노트, 사람별 메모, 다음 확인 큐를 포함합니다.
+- CSS 무결성은 코어 5종(`theme/components/visual-components/layouts/print`) 해시를 고정하고, 최신 보강 CSS(`widgets`, `visual-html`, `body-icons`, `editorial-patterns`, `shape`, `workflow`)는 별도 optional hash로 기록합니다.
+- NotebookLM legacy와 `local-gen-image-OC`는 사용하지 않습니다.
 
 ### 🔮 오늘 운세 (띠별 + 별자리 + 혈액형)
 - `코비서 운세`, `코비서 오늘 운세`, `코비서 띠별 운세`처럼 전체 띠 운세 요청을 지원합니다.
@@ -423,20 +441,20 @@ bash scripts/switch_llm_backend.sh local --dry-run
 - host-side 전환 성공 후에만 Android provider를 저장하므로, 부분 전환 상태를 만들지 않습니다.
 - 이미 목표 모드인 경우에도 실패가 아니라 **no-op 성공**으로 응답합니다.
   - 예: `이미 Local Proxy 모드입니다.`
-- `weather/news/image/notebooklm` 특수 프록시는 이 명령으로 개별 설정을 바꾸지 않으며, 기존 route를 유지합니다.
+- `weather/news/image` 특수 프록시는 이 명령으로 개별 설정을 바꾸지 않으며, 기존 route를 유지합니다. `notebooklm_proxy`는 현재 운영 route에서 사용하지 않습니다.
 - `2026-04-14` 기준 `코비서 설정 로컬`, `코비서 설정 코덱스` 실카카오 E2E 검증 완료 상태입니다.
 - Android 도움말에는 `코비서 설정 로컬 / 코비서 설정 코덱스`를 관리자용 설정 예시로 함께 안내합니다.
 
 ### ⚠️ Quick Tunnel / 인포 운영 주의
 - Quick Tunnel은 **launchd 서비스 `com.coreline.cbot.image-quick-tunnel` 1개만** 운영하는 것을 기준으로 합니다.
 - `scripts/open_image_quick_tunnel_terminal.sh`는 이제 기존 tunnel이 있으면 새 Terminal 세션을 열지 않고 그대로 종료합니다.
-- `image_proxy /health`, `notebooklm_proxy /health`(legacy)에서
+- `image_proxy /health`에서
   - `*DirectHealthy=false`
   - `*PublicDnsHealthy=true`
   - `*DnsLagSuspected=true`
   인 경우는 **맥 로컬 DNS resolver 지연**일 가능성이 높으며, 외부 공개 자체는 살아 있을 수 있습니다.
 - `코비서 인포 <URL 또는 주제>`의 기본 성공 기준은 `postUrl` 생성입니다. 카톡에는 `페이지: <postUrl>`만 보냅니다.
-- `notebooklm_proxy`의 publish 단계는 legacy/optional 경로에만 해당하며, 구형 검증용으로만 유지합니다.
+- `notebooklm_proxy`의 publish 단계는 현재 운영 경로에서 사용하지 않습니다. 구형 분석이 필요할 때만 별도 legacy 검증 대상으로 취급합니다.
 
 ---
 
@@ -458,7 +476,6 @@ flowchart TD
     D -->|리서치/조사/트렌드| RP[research_proxy :4457]
     D -->|이미지 생성| I[image_proxy :4347]
     D -->|인포그래픽| IG[image_proxy infographic :4347]
-    D -->|인포그래픽 legacy| N[notebooklm_proxy :4367]
     D -->|YouTube/GitHub/Web 링크| S[summary_proxy :4357]
     D -->|오늘 운세| FT[fortune_proxy :4377]
     D -->|대화 아카이브 질의| CV[conversation_proxy :4337]
@@ -482,12 +499,9 @@ flowchart TD
     RP --> RP1[Reddit / Hacker News / Polymarket / GitHub]
     RP --> G
 
-    I --> I1[local-gen-image-OC]
+    I --> I1[image_proxy publish server]
     I1 --> I2[Cloudflare Quick Tunnel]
     IG --> I1
-    N --> S
-    N --> N1[NotebookLM]
-    N --> I1
 
     S --> S1[YouTube 자막 / GitHub README / Web 본문]
     S --> G
@@ -526,9 +540,9 @@ flowchart TD
 | 🧠 `codex_proxy` | `4317` | Node.js | Codex OAuth 래핑, LLM 허브, 백엔드 전환 API |
 | 📈 `stock_proxy` | `4327` | Node.js | 금융 데이터 수집 + LLM 요약 |
 | 🗂️ `conversation_proxy` | `4337` | Node.js | 대화 아카이브 (SQLite + 시맨틱 검색) + 통계 |
-| 🖼️ `image_proxy` | `4347` | Node.js | 이미지 + 인포그래픽 + 공개 URL 오케스트레이션 |
+| 🖼️ `image_proxy` | `4347` | Node.js | 이미지 + 인포그래픽 + 문서 HTML + 공개 URL 오케스트레이션 |
 | 🔗 `summary_proxy` | `4357` | Node.js | YouTube / GitHub / Web 링크 요약 |
-| 📊 `notebooklm_proxy` | `4367` | Python | NotebookLM 인포그래픽 (legacy/optional) |
+| 📊 `notebooklm_proxy` | `4367` | Python | 미사용 / 보관용 NotebookLM 인포그래픽 |
 | 🔮 `fortune_proxy` | `4377` | Node.js | 띠별 / 별자리 / 혈액형 운세 |
 | 🌤️ `weather_proxy` | `4387` | Node.js | 현재 날씨 / 짧은 예보 / 카카오용 요약 |
 | 📰 `news_proxy` | `4407` | Node.js | 종합 / 경제 / IT 뉴스 브리핑 |
@@ -547,6 +561,7 @@ flowchart TD
 - `StockProxy` 선택 + 비주식 질의: 현재 host backend(`codex_proxy` 또는 `local_proxy`)
 - 메시지에 YouTube/GitHub URL 포함 또는 `링크` 키워드: `summary_proxy`
 - `코비서 인포 <URL 또는 주제>`: `image_proxy`
+- `코비서 문서입문 <URL>` 등 문서 HTML: `image_proxy -> summary_proxy source-pack`
 - `코비서 오늘 서울 날씨`, `코비서 부산 날씨`: `weather_proxy`
 - `코비서 오늘 뉴스`, `코비서 경제 뉴스`, `코비서 IT 뉴스`: `news_proxy`
 - `코비서 토픽`, `코비서 토픽 7일`: `hot_topic_proxy`
@@ -571,7 +586,7 @@ flowchart TD
 ├── conversation_proxy/     # 특정 방 대화 저장 / 검색 / 요약 / 통계 프록시 (Node.js)
 ├── image_proxy/            # 이미지 생성 / QC / OG 링크 / 인포그래픽 응답 프록시 (Node.js)
 ├── summary_proxy/          # YouTube / GitHub / Web 링크 요약 프록시 (Node.js)
-├── notebooklm_proxy/       # NotebookLM 인포그래픽 legacy/optional 프록시 (Python)
+├── notebooklm_proxy/       # 미사용 / 보관용 NotebookLM 인포그래픽 프록시 (Python)
 ├── fortune_proxy/          # 띠별 / 별자리 / 혈액형 운세 grounded 요약 프록시 (Node.js)
 ├── weather_proxy/          # 현재 날씨 / 예보 요약 프록시 (Node.js)
 ├── news_proxy/             # 카테고리 뉴스 브리핑 프록시 (Node.js)
@@ -581,8 +596,8 @@ flowchart TD
 ├── archive_rag_web/        # 검색형 RAG 웹 챗 UI / BFF (Node.js)
 ├── archive_rag_embedding/  # 벡터 임베딩 서비스 (Docker, Python)
 ├── archive_rag_data/       # canonical / catalog / exports 정규화 데이터 저장소
-├── pipeline-notebooklm/    # vendored NotebookLM pipeline / client source
-├── local-gen-image-OC/     # stable-diffusion.cpp 엔진 + OG 서버 (:3000)
+├── pipeline-notebooklm/    # 미사용 / vendored NotebookLM pipeline / client source
+├── local-gen-image-OC/     # 미사용 / stable-diffusion.cpp 엔진 + 구형 OG 서버
 ├── docker/                 # archive_rag_embedding 등 컨테이너 오케스트레이션
 ├── dev-plan/               # 신규 기능 개발 계획 문서
 ├── dev-plan-generator/     # Claude Code 개발 계획 생성 스킬
@@ -637,8 +652,9 @@ flowchart TD
   - 현재 빌드 기본값은 Mac 호스트 LAN 주소를 사용하도록 설정 가능
   - 같은 Wi-Fi라면 USB 없이도 모든 프록시를 사용할 수 있음
 - macOS launchd + watchdog 상시 실행 대상:
-  - `codex_proxy`, `local_proxy`, `stock_proxy`, `conversation_proxy`, `image_proxy`, `summary_proxy`, `notebooklm_proxy`, `fortune_proxy`, `weather_proxy`, `news_proxy`, `hot_topic_proxy`, `research_proxy`, `archive_rag_proxy`, `archive_rag_web`
+  - `codex_proxy`, `local_proxy`, `stock_proxy`, `conversation_proxy`, `image_proxy`, `summary_proxy`, `fortune_proxy`, `weather_proxy`, `news_proxy`, `hot_topic_proxy`, `research_proxy`, `archive_rag_proxy`, `archive_rag_web`
   - `image_quick_tunnel` (Cloudflare Quick Tunnel 관리)
+  - `notebooklm_proxy`는 현재 기본 launchd 설치/검증 대상에서 제외
 
 ---
 
@@ -779,7 +795,6 @@ npm install
 cat <<EOF > .env.local
 PROXY_AUTH_HEADER_NAME=X-CBot-Proxy-Auth
 PROXY_SHARED_SECRET=your_local_proxy_shared_secret
-LOCAL_GEN_IMAGE_ROOT=../local-gen-image-OC
 OG_SERVER_PORT=3000
 IMAGE_PROXY_ON_DEMAND_QUICK_TUNNEL=true
 EOF
@@ -792,7 +807,7 @@ npm run dev
 
 전제:
 
-- `local-gen-image-OC/` 디렉토리에 모델 파일(`models/*.safetensors`)이 설치돼 있어야 합니다.
+- `codex` CLI가 실행 가능하고 `image_generation` feature가 활성화돼 있어야 합니다.
 - `cloudflared` 바이너리가 PATH에 있어야 Quick Tunnel 기능이 동작합니다.
 
 ### 8. 프록시 스택을 한 번에 상시 실행으로 올리기
@@ -836,7 +851,6 @@ adb reverse tcp:4327 tcp:4327   # stock_proxy
 adb reverse tcp:4337 tcp:4337   # conversation_proxy
 adb reverse tcp:4347 tcp:4347   # image_proxy
 adb reverse tcp:4357 tcp:4357   # summary_proxy
-adb reverse tcp:4367 tcp:4367   # notebooklm_proxy
 adb reverse tcp:4377 tcp:4377   # fortune_proxy
 adb reverse tcp:4387 tcp:4387   # weather_proxy
 adb reverse tcp:4407 tcp:4407   # news_proxy
@@ -848,7 +862,7 @@ adb reverse tcp:4457 tcp:4457   # research_proxy
 adb reverse --list
 ```
 
-> `scripts/recover_adb_reverse.sh`가 위 포트 전체를 자동 등록합니다.
+> `scripts/recover_adb_reverse.sh`가 위 active 포트를 자동 등록합니다. `notebooklm_proxy :4367`은 현재 등록하지 않습니다.
 
 같은 Wi-Fi/LAN에서 직접 연결하는 경우:
 
@@ -869,7 +883,7 @@ adb shell am start -n com.coreline.cbot/.presentation.view.MainActivity
 
 1. 알림 접근 권한 허용
 2. 원하는 제공자 선택 (`GLM` / `OpenAI` / `Codex Proxy` / `Local Proxy` / `Stock Proxy`)
-3. 필요 시 각 프록시 URL 적용 (`Codex` / `Local` / `Stock` / `Archive` / `Summary` / `Image` / `NotebookLM` / `Fortune` / `Weather` / `News` / `HotTopic` / `Research` / `ArchiveRag` / `ArchiveRagWeb`)
+3. 필요 시 각 프록시 URL 적용 (`Codex` / `Local` / `Stock` / `Archive` / `Summary` / `Image` / `Fortune` / `Weather` / `News` / `HotTopic` / `Research` / `ArchiveRag` / `ArchiveRagWeb`). `NotebookLM` 설정 항목은 남아 있어도 현재 운영 라우팅에서는 사용하지 않습니다.
 4. `Test` 또는 실제 카카오톡 메시지로 확인
 
 ---
@@ -922,11 +936,13 @@ adb shell am start -n com.coreline.cbot/.presentation.view.MainActivity \
 - `YOUTUBE_SUMMARY`
 - `GITHUB_SUMMARY`
 - `INFOGRAPHIC`
+- `DOCUMENT_HTML`
 - `FORTUNE`
 
 대표 예시:
 
 - `ARCHIVE_SUMMARY` -> `코비서 바이스 오늘 대화 요약`
+- `DOCUMENT_HTML` -> `코비서 문서입문 https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview`
 - `ARCHIVE_STATS` -> `코비서 바이스 대화 통계`
 - `WEATHER_SUMMARY` -> `코비서 오늘 서울 날씨`
 - `NEWS_BRIEFING` -> `코비서 경제 뉴스`
@@ -1006,6 +1022,12 @@ curl -s -X POST 'http://127.0.0.1:4347/api/v1/generate' \
   -H 'content-type: application/json' \
   -d '{"roomName":"test","sender":"user","rawCommand":"이미지 고양이","imagePromptKo":"귀여운 고양이","requestedAt":1712505600000}'
 
+# image_proxy 문서 HTML
+curl -s -X POST 'http://127.0.0.1:4347/api/v1/document-html' \
+  -H 'X-CBot-Proxy-Auth: your_local_proxy_shared_secret' \
+  -H 'content-type: application/json' \
+  -d '{"roomName":"test","sender":"user","rawCommand":"코비서 문서입문 https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview","mode":"beginner_html","modeLabel":"입문","sourceUrl":"https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview","requestedAt":1712505600000}'
+
 # fortune_proxy 전체 운세
 curl -s 'http://127.0.0.1:4377/api/v1/fortune/today/all' \
   -H 'X-CBot-Proxy-Auth: your_local_proxy_shared_secret'
@@ -1027,6 +1049,7 @@ curl -s 'http://127.0.0.1:4377/api/v1/fortune/today?sign=%EC%A5%90%EB%9D%A0' \
 - `GET /health`
 - `POST /api/v1/generate`
 - `POST /api/v1/infographic`
+- `POST /api/v1/document-html`
 - `GET /api/v1/self-test`
 
 ### `summary_proxy`
@@ -1034,19 +1057,16 @@ curl -s 'http://127.0.0.1:4377/api/v1/fortune/today?sign=%EC%A5%90%EB%9D%A0' \
 - `POST /api/v1/youtube/summary`
 - `POST /api/v1/github/summary`
 - `POST /api/v1/web/summary`
-- `POST /api/v1/source-pack` (image_proxy 인포그래픽 / notebooklm_proxy legacy 공용 내부 API)
+- `POST /api/v1/source-pack` (image_proxy 인포그래픽/문서 HTML 내부 API)
 - `GET /api/v1/self-test`
   - `?provider=youtube`
   - `?provider=github`
   - `?provider=web`
   - `?provider=all`
 
-### `notebooklm_proxy`
-- `GET /health`
-- `POST /api/v1/infographic`
-- `GET /api/v1/self-test`
-  - `?mode=prepare` (소스 추가까지만, 기본값)
-  - `?mode=full` (PNG 생성 완료까지, 2~5분)
+### `notebooklm_proxy` (미사용 / 보관)
+- 현재 운영 라우팅, 기본 launchd 설치, 스택 점검, Android 회귀 검증 대상에서 제외합니다.
+- legacy 분석을 명시적으로 수행할 때만 `GET /health`, `POST /api/v1/infographic`, `GET /api/v1/self-test`를 별도 호출합니다.
 
 ### `fortune_proxy`
 - `GET /health`
@@ -1203,9 +1223,9 @@ KakaoTalk 알림 → Android outbox 저장 → 15분 주기 batch sync → conve
 
 ### 질의 파서
 
-- **시간 범위**: `오늘`, `어제`, `최근 N일`, `1일치`, `지난주`
+- **시간 범위**: `오늘`, `어제`, `최근 N시간(1~24시간)`, `최근 N일`, `1일치`, `지난주`
 - **카테고리**: `주요 논의`, `작업/할 일`, `결정사항`, `일정/약속`, `이슈/리스크`
-- **사람 필터**: `아무개 오늘 대화 요약해줘` → sender 필터링
+- **사람 필터**: `최경환 오늘 대화 요약해줘` → sender 필터링
 - **토픽 검색**: `API 관련해서 지난 3일 무슨 얘기 있었어` → 토픽 추출 + 시맨틱 매칭
 
 ### 요약 출력 형식
@@ -1223,19 +1243,24 @@ KakaoTalk 알림 → Android outbox 저장 → 15분 주기 batch sync → conve
 
 ## 🖼️ 이미지 생성 상세 (Image Proxy)
 
-`image_proxy`는 `local-gen-image-OC` 파이프라인을 래핑하여 이미지 생성과 인포그래픽 생성을 오케스트레이션합니다.
+`image_proxy`는 Codex CLI imagegen으로 이미지와 인포그래픽을 생성하고, `image_proxy/public/images` + image publish server + quick tunnel로 공개 링크를 발급합니다.
+
+미사용:
+
+- `local-gen-image-OC` local Stable Diffusion 생성/QC/구형 OG 서버 경로
+- `notebooklm_proxy` / NotebookLM legacy 인포그래픽 경로
 
 ### 생성 파이프라인
 
 ```text
-Android 요청 → 한국어 프롬프트 정규화 → run_all.sh 실행 → QC 검증 → OG 페이지 생성 → 공개 URL 발급
+Android 요청 → 한국어 프롬프트 정규화 → Codex CLI imagegen → image_proxy/public/images 저장 → image publish server → 공개 URL 발급
 ```
 
-- **엔진**: `stable-diffusion.cpp` (CPU 기반, GPU 불필요)
-- **기본 모델**: `DreamShaper8_LCM` (6 스텝, cfg=1.5, Euler A)
-- **해상도**: 512×512
-- **생성 타임아웃**: 240초
-- **QC 검증**: 흑화면 감지, 평탄도 검사, 저대비 검사, stddev 측정
+- **엔진**: Codex CLI imagegen (`codex_cli`)
+- **저장 경로**: `image_proxy/public/images`
+- **게시 서버**: `scripts/image_publish_server.mjs` (`:3000`)
+- **생성 타임아웃**: `IMAGE_PROXY_CODEX_CLI_TIMEOUT_MS` 기준
+- **검증 기준**: PNG 생성 + `postUrl` 공개 검증 완료
 
 ### 공개 URL 발급 모드
 
@@ -1248,7 +1273,7 @@ Android 요청 → 한국어 프롬프트 정규화 → run_all.sh 실행 → QC
 - Quick Tunnel은 `cloudflared tunnel --url http://127.0.0.1:3000` 기반
 - Rate-limit (429) 시 180초 쿨다운 적용
 - 터널 URL 유효성 확인: 최대 10회 폴링, 5초 타임아웃
-- launchd quick tunnel 서비스는 현재 OG 서버(`:3000`)를 먼저 보장한 뒤 `cloudflared`를 올리도록 되어 있어, 인포그래픽 publish 경로 복구 시 `127.0.0.1:3000/health`가 먼저 살아 있어야 합니다.
+- launchd quick tunnel 서비스는 현재 image publish server(`:3000`)를 먼저 보장한 뒤 `cloudflared`를 올리도록 되어 있어, 인포그래픽 publish 경로 복구 시 `127.0.0.1:3000/health`가 먼저 살아 있어야 합니다.
 - `ensure_image_public_url.sh` / `sync_image_proxy_live_tunnel.sh`는 현재 `trycloudflare.com` 신규 호스트의 로컬 DNS 지연을 감안해 direct 확인 실패 시 public DNS(`dig` + `curl --resolve`) 경로까지 확인합니다.
 - 따라서 운영 중 `publicTunnelHealthy=true`, `publicTunnelDirectHealthy=false`, `publicTunnelPublicDnsHealthy=true` 조합은 **외부 공개는 정상이나 macOS 로컬 DNS 반영이 늦는 상태**로 해석합니다.
 
@@ -1350,7 +1375,7 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 - `conversation_proxy` macOS `launchd + watchdog`
 - `image_proxy` macOS `launchd + watchdog`
 - `summary_proxy` macOS `launchd + watchdog`
-- `notebooklm_proxy` macOS `launchd + watchdog`
+- `notebooklm_proxy` macOS `launchd + watchdog` 스크립트는 보관용이며 기본 설치/검증 대상에서 제외
 - `fortune_proxy` macOS `launchd + watchdog`
 - `weather_proxy` macOS `launchd + watchdog`
 - `news_proxy` macOS `launchd + watchdog`
@@ -1387,7 +1412,7 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 - [scripts/archive_rag_web_self_test.sh](scripts/archive_rag_web_self_test.sh) — archive_rag_web 검증
 - [scripts/summary_proxy_self_test.sh](scripts/summary_proxy_self_test.sh) — summary_proxy 검증
 - [scripts/fortune_proxy_self_test.sh](scripts/fortune_proxy_self_test.sh) — fortune_proxy 검증
-- [scripts/notebooklm_proxy_self_test.sh](scripts/notebooklm_proxy_self_test.sh) — notebooklm_proxy 검증
+- [scripts/notebooklm_proxy_self_test.sh](scripts/notebooklm_proxy_self_test.sh) — 미사용 legacy notebooklm_proxy 수동 검증용
 - [scripts/conversation_archive_self_test.sh](scripts/conversation_archive_self_test.sh) — 대화 아카이브 검증
 - [scripts/image_proxy_self_test.sh](scripts/image_proxy_self_test.sh) — 이미지 프록시 검증
 - [scripts/ensure_image_public_url.sh](scripts/ensure_image_public_url.sh) — 이미지 공개 URL 확보
@@ -1400,7 +1425,7 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 - [scripts/launchd/install_conversation_proxy_launchd.sh](scripts/launchd/install_conversation_proxy_launchd.sh)
 - [scripts/launchd/install_image_proxy_launchd.sh](scripts/launchd/install_image_proxy_launchd.sh)
 - [scripts/launchd/install_summary_proxy_launchd.sh](scripts/launchd/install_summary_proxy_launchd.sh)
-- [scripts/launchd/install_notebooklm_proxy_launchd.sh](scripts/launchd/install_notebooklm_proxy_launchd.sh)
+- [scripts/launchd/install_notebooklm_proxy_launchd.sh](scripts/launchd/install_notebooklm_proxy_launchd.sh) — 미사용 legacy 수동 설치용
 - [scripts/launchd/install_fortune_proxy_launchd.sh](scripts/launchd/install_fortune_proxy_launchd.sh)
 - [scripts/launchd/install_weather_proxy_launchd.sh](scripts/launchd/install_weather_proxy_launchd.sh)
 - [scripts/launchd/install_news_proxy_launchd.sh](scripts/launchd/install_news_proxy_launchd.sh)
@@ -1439,9 +1464,9 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 - [docs/TAILSCALE_FUNNEL_DESIGN.md](docs/TAILSCALE_FUNNEL_DESIGN.md)
   - Cloudflare 대안으로 Tailscale Funnel 아키텍처 설계
 - [docs/NOTEBOOKLM_PROXY_V1_API.md](docs/NOTEBOOKLM_PROXY_V1_API.md)
-  - notebooklm_proxy v1 API 스펙
+  - 미사용 legacy notebooklm_proxy v1 API 보관 스펙
 - [docs/NOTEBOOKLM_INFOGRAPHIC_DIFF_ANALYSIS.md](docs/NOTEBOOKLM_INFOGRAPHIC_DIFF_ANALYSIS.md)
-  - 인포그래픽 성공/실패 비교 분석
+  - 미사용 legacy NotebookLM 인포그래픽 성공/실패 비교 분석
 - [docs/SUMMARY_PROXY_SOURCE_PACK_SPEC.md](docs/SUMMARY_PROXY_SOURCE_PACK_SPEC.md)
   - summary_proxy source-pack 엔드포인트 스펙
 
@@ -1468,7 +1493,7 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 ### 대화 아카이브
 - 지정 방(`바이브랩스`) 대화 자동 수집 (호출어 불필요)
 - SQLite + FTS5 + 시맨틱 임베딩 기반 검색
-- 자연어 요약 (`1일치 대화내용 요약해줘`, `아무개 오늘 대화 요약`)
+- 자연어 요약 (`1일치 대화내용 요약해줘`, `최경환 오늘 대화 요약`)
 - 7일 보관 후 자동 삭제
 
 ### 검색형 RAG
@@ -1488,8 +1513,8 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 
 ### 이미지 생성
 - `코비서 이미지/그림/사진` 명령으로 이미지 생성
-- 현재 운영 기준은 `image_proxy -> codex_cli imagegen -> local-gen-image-OC publish -> postUrl`
-- 코드상 `local` backend도 남아 있어 선택형 fallback/비교 실험이 가능
+- 현재 운영 기준은 `image_proxy -> codex_cli imagegen -> image_proxy publish server -> postUrl`
+- `local-gen-image-OC` backend/fallback은 사용하지 않음
 - Cloudflare Quick Tunnel 공개 URL + OG 페이지 링크 전송
 - PNG가 먼저 생성되면 Codex CLI worker 종료 지연이 있어도 조기 성공 처리
 - 이미지 QC (흑화면, 저대비, 평탄도 검증)
@@ -1504,9 +1529,26 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 - `코비서 인포 <URL 또는 주제>` 명령으로 image_proxy 기반 텍스트 포함 상세 인포그래픽 생성
 - URL 입력은 필요 시 summary_proxy source-pack을 선행하고, 주제 입력은 바로 image_proxy로 전달
 - 성공 응답은 `postUrl`만 노출하며, 카톡에는 직접 `imageUrl`을 보내지 않음
-- NotebookLM 경로는 legacy/optional로 유지
+- NotebookLM 경로는 사용하지 않음
 - `image_proxy /api/v1/infographic` smoke, GitHub URL source-pack smoke, Android 실기기 help-example 검증 완료
 - 실제 카카오방 수동 입력 E2E는 남은 검증 항목
+
+### 문서 HTML
+- `코비서 문서입문 <URL>` 등 목적형 명령으로 URL 내용을 독립 HTML 문서로 변환
+- `코비서 문서주식 한국주식시장 장중 정리`처럼 URL 없는 주식/시장 문서 명령은 `stock_proxy /api/v1/document/stock-brief` 구조 브리핑을 먼저 만든 뒤 `sourceData` 문서로 발행
+- `코비서 문서바이브 1일 정리`처럼 URL 없는 바이브 대화 문서 명령은 `conversation_proxy` 아카이브 요약을 먼저 만든 뒤 `sourceKind=vibe_archive` 문서로 발행
+- 추천 명령은 `코비서 문서도움말`에서 확인
+- 기본 URL 경로는 `Android -> image_proxy /api/v1/document-html -> summary_proxy /api/v1/source-pack -> image_proxy/public/docs/<id>/index.html -> quick tunnel postUrl`
+- 주식/시장 문서 경로는 `Android -> stock_proxy /api/v1/document/stock-brief -> image_proxy /api/v1/document-html(sourceData, sourceKind=stock_market) -> image_proxy/public/docs/<id>/index.html -> quick tunnel postUrl`
+- 바이브 대화 문서 경로는 `Android -> conversation_proxy archive summary -> image_proxy /api/v1/document-html(sourceData, sourceKind=vibe_archive) -> image_proxy/public/docs/<id>/index.html -> quick tunnel postUrl`
+- 성공 응답은 `📄 문서 HTML 생성 완료`와 `페이지: <postUrl>`을 노출
+- metadata-only/fallback-only는 껍데기 HTML로 발행하지 않고 사용자 안내 fallback을 노출
+- `stock_market` 품질 게이트는 KOSPI/KOSDAQ, `Risk Matrix`, 장중 대응 로드맵, 검증 체크리스트, 최종 권고, `wg-11`, `rm-grid`, `plan-grid` 누락 시 발행 실패로 처리
+- `vibe_archive` 품질 게이트는 오늘의 한줄, Top 5 Signals, 대화 온도판, Topic Constellation/화제 클러스터, Deep Dive, 툴·스킬 레이더, 작업·결정 노트, 사람별 메모, 다음 확인 큐, `conversation_proxy` 원천 표기와 2개 이상의 `vt-shell` 누락 시 발행 실패로 처리하고, 구형 `vibe-digest-*`/`vibe-topic-lanes` 카드 틀과 주식형 `Executive Summary`/`Risk Matrix` 틀은 금지
+- HTML 품질 회귀 검증은 `node scripts/document_html_quality_gate_check.mjs`로 실행
+- Android 단일 회귀 검증은 `bash scripts/android_full_feature_self_test.sh --suite media --case media.document_html_stock_source --timeout 600`으로 실행
+- 최신 skill 게이트 검증은 `python3 image_proxy/adaptive-html-final/scripts/validate_output.py image_proxy/public/docs/<id> --skill-dir image_proxy/adaptive-html-final --profile auto`로 실행
+- NotebookLM legacy와 `local-gen-image-OC`는 사용하지 않으며, fallback-only 결과는 성공으로 기록하지 않음
 
 ### 📈 스탁인포 링크 응답
 - `코비서 스탁인포 <주식/시장 질문>` 형식의 명령을 지원합니다.
@@ -1534,8 +1576,10 @@ URL 정규화 → 보안 검증 → HTML 수집 → Readability 본문 추출 �
 | Android help-example `INFOGRAPHIC` | 완료 | `페이지: <postUrl>`만 응답 |
 | Android help-example `STOCK_INFOGRAPHIC` | 완료 | `route=stock_infographic`, `fallback=false` |
 | Android help-example `VIBE_INFOGRAPHIC` | 완료 | `route=vibe_infographic`, `fallback=false` |
+| Android help-example `DOCUMENT_HTML` | 신규 검증 대상 | `route=document_html`, `페이지: <postUrl>` |
+| document HTML self-test | 신규 검증 대상 | public `/docs/<id>/` 200 및 HTML gate |
 | image_proxy 조기 성공 처리 | 완료 | PNG 생성 후 worker 종료 지연에도 Android timeout 재현 해소 |
-| 실제 카카오방 수동 입력 | 남음 | `인포`, `스탁인포`, `바이브인포` 자동답장 전체 경로 |
+| 실제 카카오방 수동 입력 | 남음 | `인포`, `스탁인포`, `바이브인포`, `문서HTML` 자동답장 전체 경로 |
 
 ### Android 전면 테스트
 - 메인 화면 `도움말 예제 테스트` 버튼으로 주요 예제를 앱 전단에서 직접 실행 가능
@@ -1597,14 +1641,12 @@ archive_rag_proxy ─→ LLM 허브
 archive_rag_web ───→ archive_rag_proxy
 
 image_proxy ───────→ summary_proxy (source-pack, 인포 URL 입력 시)
-                  └→ Codex CLI imagegen + local-gen-image-OC + Cloudflare Tunnel
-notebooklm_proxy ──→ summary_proxy (source-pack) → LLM 허브
-                  └→ NotebookLM + local-gen-image-OC + Cloudflare Tunnel (legacy/optional)
+                  └→ Codex CLI imagegen + image_proxy publish server + Cloudflare Tunnel
 ```
 
 - LLM 허브: `codex_proxy`와 `local_proxy`가 sibling으로 병렬 기동. 특수 기능 프록시는 `LLM_BACKEND_PROVIDER=codex|local` 환경변수로 허브를 전환합니다.
 - 전역 전환은 `bash scripts/switch_llm_backend.sh <codex|local>`로 일괄 적용됩니다.
-- `image_proxy`는 일반 이미지와 인포그래픽 기본 경로, `notebooklm_proxy`는 legacy/optional 호환 경로입니다.
+- `image_proxy`는 일반 이미지와 인포그래픽의 단일 운영 경로입니다. `notebooklm_proxy`는 현재 사용하지 않습니다.
 - `archive_rag_proxy`와 `archive_rag_web`는 별도 RAG 스택을 형성합니다. 현재 active 경로는 `archive_rag_data` canonical/catalog이며, `archive_rag_embedding`/OpenSearch/Qdrant는 sparse/dense 확장 경로입니다.
 
 ---
