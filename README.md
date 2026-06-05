@@ -1,9 +1,9 @@
 <div align="center">
 
-<img width="2752" height="1536" alt="unnamed" src="https://github.com/user-attachments/assets/8e3c2520-5940-4939-9c3c-2bb7dc8098ef" />
+<img width="2752" height="1536" alt="귀여운_인공지능_비서_코비서_V3" src="https://github.com/user-attachments/assets/9b955ae9-15c1-427e-8e12-b4689ee4caf7" />
 
+<img width="0" height="0" alt="unnamed" src="https://github.com/user-attachments/assets/8e3c2520-5940-4939-9c3c-2bb7dc8098ef" />
 <img width="0" height="0" alt="내 손안의 똑똑한 인공지능 비서" src="https://github.com/user-attachments/assets/ed44a691-82f8-4bc7-8be4-af2e4b16f62b" />
-
 <img width="0" height="0" alt="kakao_archive_rag_architecture_infographic" src="https://github.com/user-attachments/assets/ae612b10-2c5d-45ef-96e1-ca352e88fced" />
 
 <h1 id="top">🤖 코비서 · Coreline Kakao Chatbot V3</h1>
